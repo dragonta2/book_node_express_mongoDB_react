@@ -10,8 +10,21 @@ var express = require('express');
 // viewsディレクトリの絶対パスを作成
 var path = require('path');
 
+// mongoseをセット｜ExpressアプリケーションをMongoDBに接続させる
+var mongose = require('mongose');
+
 // Expressのインスタンス appを定義
 var app = express();
+
+
+mongose.connect('mongodb://localhost:27017/chatapp', function (err) {
+
+  if (err) {
+    console.error(err);
+  } else {
+    console.log("successfully connected to MongoDB.");
+  }
+});
 
 
 // テンプレートエンジンを設定
