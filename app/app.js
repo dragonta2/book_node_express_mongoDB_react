@@ -11,13 +11,14 @@ var express = require('express');
 var path = require('path');
 
 // mongoseをセット｜ExpressアプリケーションをMongoDBに接続させる
-var mongose = require('mongose');
+var mongoose = require('mongoose');
 
 // Expressのインスタンス appを定義
 var app = express();
 
 
-mongose.connect('mongodb://localhost:27017/chatapp', function (err) {
+// 指定したパスにMongoDBを接続してコールバック関数を実行させる
+mongoose.connect('mongodb://localhost:27017/chatapp', function (err) {
 
   if (err) {
     console.error(err);
@@ -25,6 +26,21 @@ mongose.connect('mongodb://localhost:27017/chatapp', function (err) {
     console.log("successfully connected to MongoDB.");
   }
 });
+
+
+
+// 以下、このサイトを参考に書いた記法 ちゃんと動く！ https://reffect.co.jp/node-js/express-jsnode-js-mongodb 
+
+// mongoose.connect('mongodb://localhost:27017/chatapp');
+
+// var db = mongoose.connection;
+
+// db.on('error', console.error.bind(console, 'DB connection error:'));
+
+// db.once('open', () => console.log('DB connection successful'));
+
+
+
 
 
 // テンプレートエンジンを設定
