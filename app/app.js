@@ -13,8 +13,23 @@ var path = require('path');
 // mongoseをセット｜ExpressアプリケーションをMongoDBに接続させる
 var mongoose = require('mongoose');
 
+
+// スキーマをインポート
+var Message = require('./schema/Message');
+
 // Expressのインスタンス appを定義
 var app = express();
+
+
+// var newMessage = new Message({
+//   username: req.body.username,
+//   message: req.body.message
+// });
+
+// newMessage.save((err) => {
+//   if (err) throw err;
+//   return res.redirect("/");
+// });
 
 
 // 指定したパスにMongoDBを接続してコールバック関数を実行させる
@@ -41,8 +56,6 @@ mongoose.connect('mongodb://localhost:27017/chatapp', function (err) {
 
 
 
-
-
 // テンプレートエンジンを設定
 app.set('views', path.join(__dirname, 'views'));
 
@@ -58,13 +71,24 @@ app.get('/', function (req, res, next) {
   return res.render('index', { title: 'Hello World' });
 });
 
-// getメソッドでルーティング 第一引数にパスを設定｜hogeディレクトリを設定
-app.get('/hoge', function (req, res, next) {
+// getメソッドでルーティング 第一引数にパスを設定｜updateディレクトリを設定
+app.get('/update', function (req, res, next) {
 
-  // res.send 応答をクライアントに送信して要求
-  return res.send('Hoge');
+  // pugファイルを描画
+  return res.render('update');
 });
 
+app.post("/update", function (req, res, nest) {
+
+  var newMessage = new Message({
+    username: req.body.username,
+    message: req.body.message
+  });
+  newMessage.save((err) => {
+    if (err) throw err;
+    return res.redirect("/");
+  });
+});
 
 // node.jsに定義したhttpサーバーにExpressのインスタンスであるappを設置
 var server = http.createServer(app);
