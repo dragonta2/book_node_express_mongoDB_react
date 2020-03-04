@@ -10,6 +10,9 @@ var express = require('express');
 // viewsディレクトリの絶対パスを作成
 var path = require('path');
 
+// POST形式のリクエストのボディをパースする
+var bodyparser = require('body-parser');
+
 // mongoseをセット｜ExpressアプリケーションをMongoDBに接続させる
 var mongoose = require('mongoose');
 
@@ -54,7 +57,8 @@ mongoose.connect('mongodb://localhost:27017/chatapp', function (err) {
 
 // db.once('open', () => console.log('DB connection successful'));
 
-
+// リクエストを返すルーティングよりも前の位置でbody-paserミドルウェアを設定する（そうしないと適用されなくなってしまう）
+app.use(bodyparser());
 
 // テンプレートエンジンを設定
 app.set('views', path.join(__dirname, 'views'));
