@@ -71,8 +71,16 @@ app.set('view engine', 'pug');
 // getメソッドでルーティング 第一引数にパスを設定｜ルートを設定
 app.get('/', function (req, res, next) {
 
-  // res.renderでテンプレートでの描画を設定｜テンプレート名とテンプレート内で指定している変数titleの値をセット
-  return res.render('index', { title: 'Hello World' });
+  // find()｜クエリに該当する複数のデータを取得するメソッド
+  // MongoDBのクエリの基本形式｜第一引数:オブジェクト形式でクエリを設定、最後の引数に結果を取得するコールバック関数を設定（エラーは必ずコールバックの中の第一引数に入る。第二引数に結果が配列形式で格納される）
+  Message.find({}, function (err, msgs) {
+
+    if (err) throw err;
+
+    // res.renderでテンプレートでの描画を設定｜テンプレート名, テンプレート内で指定している変数の値をセット
+    return res.render('index', { messages: msgs });
+
+  });
 });
 
 // getメソッドでルーティング 第一引数にパスを設定｜updateディレクトリを設定
