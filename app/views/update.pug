@@ -1,10 +1,16 @@
+// HTMLに残るコメント
+//- HTMLに残らないコメント
+
+//- タグと(の前に半スペを入れてはダメ。エラーが出てしまう（変数やテキストを入れるときに半スペを空けるみたい）
+
 doctype html
 html(lang="ja")
   head
     meta(charset="utf-8")
   body
     h1 メッセージを保存
-    form(acton="update" method="POST")
+    form(acton="update" method="POST" encType="multipart/form-data")
       input(type="text" name="username" placeholder="名前")
       textarea(placeholder="メッセージ" name="message")
+      input(type="file" name="image")
       button(type="submit") 送信

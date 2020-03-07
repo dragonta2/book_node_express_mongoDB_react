@@ -6,7 +6,8 @@ var Message = mongoose.Schema({
   date: {
     type: Date,
     default: new Date()
-  }
+  },
+  image_path: String
 });
 
 module.exports = mongoose.model('Message', Message);
