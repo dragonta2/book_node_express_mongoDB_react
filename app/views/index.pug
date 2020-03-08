@@ -8,25 +8,26 @@ html(lang="ja")
   head
     meta(charset="utf-8")
   body
+    //- ユーザーオブジェクトがあったら、navタグにユーザー名とアバター画像を表示
     if user
       nav
         span #{user.username}
         br
         img(src=user.avatar_path)
+    //- ユーザーオブジェクトがなかったら、navタグにユーザー登録画面とログイン画面のリンクを表示
     else
       nav
         a(href="/signin") ユーザー登録
         br
         a(href="/login") ログイン
-  h1 #{title}
-  section
+    h1 #{title}
+    section
     //- each で app.js内の return res.render('index', { messages: msgs }); でセットしている値をループさせる。
     each msg in messages
       div
         h2 #{msg.username}
         time #{msg.date}
         p #{msg.message}
-      
-      //- pugのif構文
+      //- pugのif構文｜もしアップロードされた画像がimage_pathにあったらその画像を表示
       if msg.image_path
         img(src=msg.image_path)

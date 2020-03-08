@@ -19,12 +19,11 @@ var mongoose = require('mongoose');
 // multipart/form-data形式のリクエスト（画像などの大きなファイルリクエストをパースする形式）をパースするミドルウェア
 var fileUpload = require('express-fileupload');
 
-// スキーマをインポート｜/schema/Message.js
+// スキーマをインポート｜Mongooseを使用する場合はスキーマを経由してMongoDBのデータを操作することになる｜/schema/Message.js
 var Message = require('./schema/Message');
 
 // スキーマをインポート｜/schema/User.js
 var User = require('./schema/User');
-
 
 
 // express用 汎用認証ミドルウェア
@@ -40,12 +39,16 @@ var session = require('express-session');
 var app = express();
 
 
-// 指定したパスにMongoDBを接続してコールバック関数を実行させる
+// 指定したパスにMongoDBを接続してコールバック関数を実行させる｜第一引数に接続するMongoDBのURLを指定
+// 以下、ローカル27017番ポート、 MongoDBがデフォルトで使用するポートのchatappというDBに接続することを指定している。
+// コールバック関数内の第一引数にはエラーの内容が入る。
 mongoose.connect('mongodb://localhost:27017/chatapp', function (err) {
 
   if (err) {
     console.error(err);
   } else {
+
+    // DBに接続できたら以下のテキストがExpressを動かしているシェル上に表示される。
     console.log("successfully connected to MongoDB.");
   }
 });
@@ -90,9 +93,10 @@ app.use("/image", express.static(path.join(__dirname, 'image')));
 app.use('/avatar', express.static(path.join(__dirname, 'avatar')));
 
 
-
-// getメソッドでルーティング 第一引数にパスを設定(/の記号を必ず入れること！）｜ルート(index)を設定
+// getメソッドでルーティングを設定 第一引数にパスを設定(/の記号を必ず入れること！）
 // ルーティングを作成｜トップ画面を描画
+
+// ※ 解説｜サーバの「/」にGETメソッドでアクセスしてきたときに、書かれているコールバック関数を返す。というコードになります。GETメソッドというのは、要は普通のアクセスです。ブラウザでURLを入力して開くとGETメソッドでのアクセスになります。
 app.get('/', function (req, res, next) {
 
   // find()｜クエリに該当する複数のデータを取得するメソッド
@@ -113,16 +117,20 @@ app.get('/', function (req, res, next) {
 });
 
 
-// ルーティングを作成｜会員登録用画面
+// ルーティングを作成｜新規会員登録用画面
 app.get('/signin', function (req, res, next) {
+
+  // pugファイル｜signin.pugを描画
   return res.render('signin');
 });
 
 
-// ルーティングを作成｜会員登録データ投稿画面
+// ルーティングを作成｜新規会員登録データ投稿画面
 app.post('/signin', fileUpload(), function (req, res, next) {
 
   var avatar = req.files.avatar;
+
+
   avatar.mv('./avatar/' + avatar.name, function (err) {
 
     if (err) throw err;
@@ -130,11 +138,14 @@ app.post('/signin', fileUpload(), function (req, res, next) {
     var newUser = new User({
       username: req.body.username,
       password: req.body.password,
+      // vies/signin.pugに書かれた input(type="file" name="avatar") のname属性値が入る
       avatar_path: '/avatar/' + avatar.name
     });
 
     newUser.save((err) => {
+
       if (err) throw err;
+
       return res.redirect('/');
     });
   });
@@ -143,20 +154,25 @@ app.post('/signin', fileUpload(), function (req, res, next) {
 
 // ルーティングを作成｜ログイン画面を描画
 app.get('/login', function (req, res, next) {
+
+  // pugファイル｜login.pugを描画
   return res.render('login');
 });
 
 // ログイン画面に認証を送信｜OKならトップ画面へ、失敗ならログイン画面へ飛ばす
 app.post('/login', passport.authenticate('local'), function (req, res, next) {
 
+  // findOne()｜クエリに該当するデータを一つだけ取得するメソッド
   User.findOne({ _id: req.session.passport.user }, function (err, user) {
 
-    // エラーかセッション情報を持っていなかったらログイン画面へ遷移
+    // エラーまたはセッション情報を持っていなかったら
     if (err || !req.session) {
+
+      // ログイン画面へ遷移
       return res.redirect('/login');
     }
 
-    // セッション情報をもっていたら、ユーザー名とアバター画像を代入
+    // セッション情報をもっていたら、userオブジェクトにユーザー名とアバター画像を代入して
     req.session.user = {
       username: user.username,
       avatar_path: user.avatar_path
@@ -172,18 +188,20 @@ app.post('/login', passport.authenticate('local'), function (req, res, next) {
 // passport.authenticate('local')でセッションが設定されていない場合に処理が渡される
 passport.use(new LocalStrategy(
 
-  // usernameとpasswordはPOST形式でルーティングの/loginに送信されたパラメータから自動的にセットされる
+  // usernameとpasswordはPOST形式でルーティングの/loginから送信されたパラメータから自動的にセットされる
   // まず、POSTで送信されたユーザー名とパスワードからDBに問い合わせて、該当のユーザーが登録済かをチェック、コールバック関数のdone()を呼びだす。
   function (username, password, done) {
     User.findOne({ username: username }, function (err, user) {
 
-      // doneの第一引数にはエラーが発生した場合にtrurと評価される値を渡す。第2引数には認証が成功して登録済みのユーザーの場合はtrueをそうでない場合はfalseを渡す。
+      // doneの第一引数にはエラーが発生した場合にtrueと評価される値を渡す。第2引数には認証が成功して登録済みのユーザーの場合はtrueをそうでない場合はfalseを渡す。
       if (err) { return done(err); }
 
+      // userオブジェクトがなかったら、エラーメッセージを返す
       if (!user) {
         return done(null, false, { message: 'Incorrect username.' });
       }
 
+      // userオブジェクトのpasswordがコールバック関数の第二引数に入っているものと違ったら、エラーメッセージを返す
       if (user.password !== password) {
         return done(null, false, { message: 'Incorrect password.' });
       }
@@ -218,32 +236,6 @@ passport.deserializeUser(function (id, done) {
 });
 
 
-
-
-// app.post('/avatar', fileUpload(), function (req, res, next) {
-
-//   var avatar = req.files.avatar;
-//   avatar.mv('./avatar/' + avatar.name, function (err) {
-
-//     if (err) throw err;
-
-//     var newUser = new User({
-//       username: req.body.username,
-//       password: req.body.password,
-//       avatar_path: '/avatar/' + avatar.name
-//     });
-
-//     newUser.save((err) => {
-//       if (err) throw err;
-//       return res.redirect('/');
-//     });
-//   });
-// });
-
-
-
-
-
 // ルーティングを作成｜update画面を描画
 app.get('/update', function (req, res, next) {
 
@@ -253,36 +245,44 @@ app.get('/update', function (req, res, next) {
 
 
 // postメソッドでupdate画面のデータを送信する
+// 第2引数にミドルウェアのfileUpload()を追加する。これによって multipart/form-data形式で投稿された画像データなどのバイナリデータを、サーバー側で受け取ることができるようになる。
 app.post("/update", fileUpload(), function (req, res, nest) {
 
-  if (req.files && req.files.image) {
-    req.files.image.mv('./image/' + req.files.image.name,
+  // スキーマに新しいデータを追加するために、スキーマに入れるデータのインスタンス newMessageを生成。JSON形式で文字列や数値などのMongoDBに入れることのできるデータを格納する。
+  var newMessage = new Message({
+    username: req.body.username,
+    message: req.body.message
+  });
 
-      function (err) {
+  // express-fileuploadを使用したルーティング内部では、req.files内にフォームから投稿された画像ファイルがメモリ上に格納される。views/update.pug内に input(type="file" name="image")と指定しているので、「req.files.インプットタグに指定したname属性値」 でデータをサーバー側で取り出すことができる。
+  // コールバック関数の第一引数にfiles と files.imageオブジェクトがあったら
+  if (req.files && req.files.image) {
+    req.files.image.mv('./image/' + req.files.image.name, function (err) {
+
+      if (err) throw err;
+
+      // 画像をオブジェクトに追加
+      newMessage.image_path = '/image/' + req.files.image.name;
+
+      // データのインスタンス newMessageオブジェクトを保存。スキーマに適合しないデータが入った場合は、エラーオブジェクトが返ってくるので、if文で検知してそのエラー内容によって後処理を行う。無事にデータが保存できた場合はエラーオブジェクトがnullになるので、if文の中（エラーを返す）は通らない。
+      newMessage.save((err) => {
 
         if (err) throw err;
 
-        var newMessage = new Message({
-          username: req.body.username,
-          message: req.body.message,
-          image_path: '/image/' + req.files.image.name
-        });
-
-        newMessage.save((err) => {
-          if (err) throw err;
-
-          return res.redirect("/");
-        });
+        // トップ画面へ遷移
+        return res.redirect("/");
       });
-  } else {
-    var newMessage = new Message({
-      username: req.body.username,
-      message: req.body.message
     });
+
+    // コールバック関数の第一引数にfiles と files.imageオブジェクトが無かったら
+  } else {
+
+    // データのインスタンス newMessageをDBに保存。
     newMessage.save((err) => {
 
       if (err) throw err;
 
+      // トップ画面へ遷移
       return res.redirect("/");
     });
   }

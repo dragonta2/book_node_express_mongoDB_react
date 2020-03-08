@@ -9,6 +9,7 @@ html(lang="ja")
     meta(charset="utf-8")
   body
     h1 メッセージを保存
+    //- 属性値 encType="multipart/form-data" をつけることで ミドルウェア express-fileuploadを使って画像データなどのバイナリデータを送信することができるようになる。｜app.js内で書かれている req.files.imageに格納される
     form(action="update" method="POST" encType="multipart/form-data")
       //- 投稿を行う際にセッションに保存したユーザー名を使用するため、以下の名前を入力する欄は不要となる。
       //- input(type="text" name="username" placeholder="名前")
