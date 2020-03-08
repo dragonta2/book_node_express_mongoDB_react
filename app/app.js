@@ -103,7 +103,10 @@ app.get('/', function (req, res, next) {
 
     // res.renderでテンプレートでの描画を設定｜テンプレート名, テンプレート内で指定している変数の値をセット
     return res.render('index', {
-      messages: msgs
+      messages: msgs,
+
+      // セッション情報の有無を確認してテンプレートに伝えるようにする
+      user: req.session && req.session.user ? req.session.user : null
     });
 
   });
@@ -135,6 +138,34 @@ app.post('/signin', fileUpload(), function (req, res, next) {
       return res.redirect('/');
     });
   });
+});
+
+
+// ルーティングを作成｜ログイン画面を描画
+app.get('/login', function (req, res, next) {
+  return res.render('login');
+});
+
+// ログイン画面に認証を送信｜OKならトップ画面へ、失敗ならログイン画面へ飛ばす
+app.post('/login', passport.authenticate('local'), function (req, res, next) {
+
+  User.findOne({ _id: req.session.passport.user }, function (err, user) {
+
+    // エラーかセッション情報を持っていなかったらログイン画面へ遷移
+    if (err || !req.session) {
+      return res.redirect('/login');
+    }
+
+    // セッション情報をもっていたら、ユーザー名とアバター画像を代入
+    req.session.user = {
+      username: user.username,
+      avatar_path: user.avatar_path
+    };
+
+    // トップ画面へ遷移
+    return res.redirect('/');
+  });
+
 });
 
 
@@ -210,18 +241,7 @@ passport.deserializeUser(function (id, done) {
 // });
 
 
-// ルーティングを作成｜ログイン画面を描画
-app.get('/login', function (req, res, next) {
-  return res.render('login');
-});
 
-// ログイン画面に認証を送信｜OKならトップ画面へ、失敗ならログイン画面へ飛ばす
-app.post('/login', passport.authenticate('local',
-  {
-    successRedirect: '/',
-    failureRedirect: '/login'
-  })
-);
 
 
 // ルーティングを作成｜update画面を描画

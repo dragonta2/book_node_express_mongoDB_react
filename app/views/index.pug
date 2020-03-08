@@ -8,7 +8,17 @@ html(lang="ja")
   head
     meta(charset="utf-8")
   body
-    h1 #{title}
+    if user
+      nav
+        span #{user.username}
+        br
+        img(src=user.avatar_path)
+    else
+      nav
+        a(href="/signin") ユーザー登録
+        br
+        a(href="/login") ログイン
+  h1 #{title}
   section
     //- each で app.js内の return res.render('index', { messages: msgs }); でセットしている値をループさせる。
     each msg in messages
