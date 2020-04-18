@@ -40,7 +40,7 @@ var app = express();
 
 
 // 指定したパスにMongoDBを接続してコールバック関数を実行させる｜第一引数に接続するMongoDBのURLを指定
-// 以下、ローカル27017番ポート、 MongoDBがデフォルトで使用するポートのchatappというDBに接続することを指定している。
+// 以下、ローカル27017番ポート(MongoDBがデフォルトで使用するポート)のchatappというDBに接続することを指定している。
 // コールバック関数内の第一引数にはエラーの内容が入る。
 mongoose.connect('mongodb://localhost:27017/chatapp', function (err) {
 
@@ -138,6 +138,7 @@ app.post('/signin', fileUpload(), function (req, res, next) {
     var newUser = new User({
       username: req.body.username,
       password: req.body.password,
+
       // vies/signin.pugに書かれた input(type="file" name="avatar") のname属性値が入る
       avatar_path: '/avatar/' + avatar.name
     });
