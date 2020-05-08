@@ -1,4 +1,4 @@
-# book_node_express_mongoDB_react
+# Kindle本_JSでのWeb開発_Node.js_Express_MongoDB_ReactでWebアプリを開発しよう
 kindle本｜JavaScriptでWeb開発 Node.js+Express+MongoDB+ReactでWebアプリを開発しよう 用のリポジトリです。
 
 ### パスメモ
@@ -21,3 +21,5 @@ npx nodemon app.js
 ```
 node app.js
 ```
+
+
